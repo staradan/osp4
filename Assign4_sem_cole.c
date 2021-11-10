@@ -11,10 +11,16 @@
 sem_t mutex;
 pthread_mutex_t lock;
 int numreader = 0;
+int order[10];
+int currIndex = 0;
 
 //writer function
 void writerFunction(int i){
+    while (currIndex != i-1){
+
+    }
     sem_wait(&mutex);
+    currIndex++;
     printf("Writer %d starts writing\n", i);
     sleep(4); 
     printf("Writer %d ends writing\n", i);
@@ -23,14 +29,19 @@ void writerFunction(int i){
 
 //reader function
 void readerFunction(int i){
+    while (currIndex != i-1){
+        
+    }
     pthread_mutex_lock(&lock);
     numreader++;
     if(numreader == 1) {
         sem_wait(&mutex);
     }
+    
     pthread_mutex_unlock(&lock);
-
+    
     printf("Reader %d starts reading\n", i);
+    currIndex++;
     sleep(4); 
     printf("Reader %d ends reading\n", i);
 
@@ -69,13 +80,14 @@ int main(int argc, char const *argv[]){
     }
 
     for(int i = 1; i < argc; i = i+1 ){
+        order[i] = argv[i];
+
         // make the threads
-        if (strcmp("1",argv[i]) == 0) {
-            pthread_create(&read[i], NULL, writerFunction, i);
-        } else {
+        if (strcmp("0",argv[i]) == 0) {
             pthread_create(&read[i], NULL, readerFunction, i);
+        } else {
+            pthread_create(&read[i], NULL, writerFunction, i);
         } 
-        
     }
 
     for(int i = 1; i < argc; i = i+1 ){
